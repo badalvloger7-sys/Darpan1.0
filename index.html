@@ -1,0 +1,1247 @@
+<!index.html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darpan Wears: Premium Collection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { createIcons, ShoppingBag, MapPin, X, Lock, Briefcase, ChevronRight, ListPlus, Package, LayoutGrid, HandCoins, AlertTriangle, Image, Trash2, ListOrdered, User } from 'https://unpkg.com/lucide@latest';
+        // Note: Added Trash2 for product deletion, ListOrdered for My Orders, and User for auth status
+        createIcons({ icons: { ShoppingBag, MapPin, X, Lock, Briefcase, ChevronRight, ListPlus, Package, LayoutGrid, HandCoins, AlertTriangle, Image, Trash2, ListOrdered, User } });
+    </script>
+    <script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f9;
+        }
+        ::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        .btn-premium {
+            background-color: #171717; /* Deep Charcoal/Black */
+            color: #ffffff;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-premium:hover {
+            background-color: #404040;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-premium:active { /* Added active state for click animation */
+            transform: scale(0.98);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        .text-accent {
+            color: #d97706; /* Amber-600 for Gold Accent */
+        }
+        .tab-active {
+            border-bottom: 3px solid #d97706; /* Amber-600 */
+            color: #171717;
+            font-weight: 600;
+        }
+        /* Mobile-first detail modal styling */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fff;
+            z-index: 102;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+        }
+        .modal-open {
+            transform: translateY(0);
+        }
+        
+        /* === Floating Buttons Styling === */
+        .floating-whatsapp-button {
+            /* Strong green gradient */
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(4, 120, 86, 0.5);
+            z-index: 108; /* Ensure it stays above all modals */
+        }
+        
+        .floating-whatsapp-button:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 30px rgba(4, 120, 86, 0.7);
+        }
+
+        .floating-order-button {
+            /* Neutral color for My Orders */
+            background-color: #3f3f46; /* Neutral-700 */
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            z-index: 108; 
+        }
+
+        .floating-order-button:hover {
+            background-color: #52525b; /* Neutral-600 */
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* "Made by Badal" tag styling */
+        .badal-tag {
+            position: fixed;
+            bottom: 4px; /* Near the button */
+            right: 20px;
+            font-size: 10px;
+            color: #9ca3af;
+            z-index: 107;
+        }
+        
+        /* User ID Bar Styling */
+        .user-id-bar {
+            background-color: #fffbeb; /* Amber 50 */
+            border: 1px solid #fcd34d; /* Amber 300 */
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl min-h-screen">
+
+        <header class="sticky top-0 bg-white border-b border-gray-200 z-10">
+            <div class="p-4 flex justify-between items-center">
+                <h1 class="text-3xl font-extrabold text-neutral-900 tracking-wide">DARPAN WEARS</h1>
+                <button onclick="openDashboardAuthModal()" aria-label="Owner Dashboard" class="text-neutral-900 hover:text-amber-600 p-2 rounded-lg transition duration-150 border border-neutral-200 shadow-sm flex items-center text-sm font-semibold">
+                    <i data-lucide="briefcase" class="w-5 h-5 mr-1"></i> Dashboard
+                </button>
+            </div>
+             <div id="auth-status-bar" class="user-id-bar p-2 text-xs font-mono text-neutral-700 flex items-center justify-between">
+                <div class="flex items-center truncate">
+                    <i data-lucide="user" class="w-4 h-4 mr-2 text-amber-600 flex-shrink-0"></i>
+                    <span id="user-id-display" class="font-bold truncate">Loading User...</span>
+                </div>
+                <button onclick="copyUserId()" class="text-neutral-500 hover:text-neutral-900 px-2 py-0.5 rounded-md hover:bg-amber-100 transition duration-150">Copy</button>
+            </div>
+        </header>
+
+        <main class="p-6">
+            <h2 class="col-span-2 text-2xl font-bold text-neutral-900 mb-4 tracking-tight border-b pb-2">Premium Collection</h2>
+            
+            <div id="customer-product-grid" class="grid grid-cols-2 gap-6">
+                <p class="col-span-2 text-center text-neutral-500 mt-8">Products are loading...</p>
+                </div>
+            
+            <div class="h-12"></div>
+        </main>
+        
+        <div id="product-detail-modal" class="modal-container hidden">
+            <div class="sticky top-0 p-3 bg-white z-20 flex justify-between items-center shadow-sm border-b">
+                <button onclick="closeProductDetailModal()" class="flex items-center text-sm font-semibold text-neutral-500 hover:text-neutral-800 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                    <i data-lucide="chevron-right" class="w-5 h-5 rotate-180 mr-1"></i> Go Back
+                </button>
+                <button onclick="closeProductDetailModal()" class="text-neutral-900 hover:text-amber-600 p-2 rounded-full bg-gray-100 shadow-lg" aria-label="Close">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div id="detail-content-area" class="pb-20">
+                <div class="aspect-square bg-gray-100 overflow-hidden">
+                    <img id="detail-image" src="" alt="Large Product Image" class="w-full h-full object-cover">
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <div class="border-b pb-3">
+                        <h2 id="detail-name" class="text-3xl font-extrabold text-neutral-900 mb-1"></h2>
+                        <p id="detail-price" class="text-4xl font-black text-amber-600">
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="text-xl font-bold text-neutral-900 flex items-center"><i data-lucide="package" class="w-5 h-5 mr-2 text-amber-600"></i> Product Details</h3>
+                        <p id="detail-description" class="text-neutral-700 leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto p-4 bg-white border-t-2 border-amber-600 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] z-30">
+                <button id="detail-order-btn" class="w-full flex items-center justify-center py-4 px-4 rounded-xl shadow-2xl text-xl font-extrabold btn-premium focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-amber-600 transition duration-150"
+                    onclick="">
+                    <i data-lucide="shopping-bag" class="w-6 h-6 mr-3"></i> Order Now
+                </button>
+            </div>
+        </div>
+
+        <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-end justify-center z-[103] transition-opacity duration-300 opacity-0 pointer-events-none">
+            <div id="order-form-container" class="bg-white w-full max-w-xl rounded-t-3xl shadow-2xl transform translate-y-full transition-transform duration-300">
+                <div class="p-5 border-b flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-neutral-900">Complete Order (Address)</h3>
+                    <button onclick="closeCheckoutModal()" class="text-neutral-500 hover:text-neutral-800 p-2 rounded-full bg-gray-100">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="selected-product-info" class="mb-5 p-4 bg-amber-50 border-l-4 border-amber-600 rounded-lg"></div>
+                    <form id="order-form" class="space-y-4">
+                        <div>
+                            <label for="customer_name" class="block text-sm font-medium text-neutral-700">Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="customer_name" name="customer_name" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-neutral-700" placeholder="e.g.: Ankit Kumar">
+                        </div>
+                        
+                        <div>
+                            <label for="phone_number" class="block text-sm font-medium text-neutral-700">Phone <span class="text-red-500">*</span></label>
+                            <input type="tel" id="phone_number" name="phone_number" required pattern="[0-9]{10}" class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-neutral-700" placeholder="10-digit mobile number">
+                        </div>
+                        
+                        <div>
+                            <label for="address_line1" class="block text-sm font-medium text-neutral-700">Full Address (House No., Street, Area) <span class="text-red-500">*</span></label>
+                            <input type="text" id="address_line1" name="address_line1" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-neutral-700" placeholder="e.g.: 123, Main Road, Near Post Office">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="city" class="block text-sm font-medium text-neutral-700">City <span class="text-red-500">*</span></label>
+                                <input type="text" id="city" name="city" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-neutral-700">
+                            </div>
+                            
+                            <div>
+                                <label for="state" class="block text-sm font-medium text-neutral-700">State <span class="text-red-500">*</span></label>
+                                <input type="text" id="state" name="state" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-neutral-700">
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="product_id_input" name="product_id">
+                        <input type="hidden" id="product_name_input" name="product_name">
+                        <input type="hidden" id="product_price_input" name="product_price">
+                        
+                        <button type="submit" id="place-order-btn" class="w-full flex items-center justify-center py-3 px-4 rounded-lg shadow-lg text-lg font-medium btn-premium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition duration-150">
+                            <i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> Place Order
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div id="my-orders-modal" class="modal-container hidden">
+            <div class="sticky top-0 p-3 bg-white z-20 flex justify-between items-center shadow-sm border-b">
+                <h3 class="text-xl font-extrabold text-neutral-900 flex items-center">
+                    <i data-lucide="list-ordered" class="w-6 h-6 mr-2 text-amber-600"></i>
+                    मेरे ऑर्डर
+                </h3>
+                <button onclick="closeMyOrdersModal()" class="text-neutral-900 hover:text-amber-600 p-2 rounded-full bg-gray-100 shadow-lg" aria-label="Close">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 space-y-4">
+                <p class="text-neutral-600 text-sm">यहाँ आपके द्वारा Darpan Wears पर दिए गए सभी ऑर्डर की सूची है।</p>
+                <div id="customer-orders-list" class="space-y-3">
+                    <p class="text-center text-neutral-500 mt-8">ऑर्डर लोड हो रहे हैं...</p>
+                    </div>
+            </div>
+        </div>
+
+        <div id="dashboard-auth-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[104] p-4">
+            <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl text-center">
+                <div class="text-neutral-900 mx-auto mb-4 p-3 bg-gray-100 rounded-full w-fit">
+                    <svg data-lucide="lock" class="w-8 h-8"></svg>
+                </div>
+                <h4 class="text-xl font-bold text-neutral-900 mb-4">Owner Dashboard</h4>
+                <p class="text-neutral-600 mb-4">Enter password to continue.</p>
+                <form id="dashboard-auth-form" class="space-y-4">
+                    <input type="password" id="dashboard-password" required class="block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 text-center text-lg tracking-widest" placeholder="Password">
+                    <p id="auth-error-message" class="text-red-500 text-sm hidden"></p>
+                    <button type="submit" class="w-full flex items-center justify-center py-3 px-4 rounded-lg shadow-lg font-medium btn-premium">
+                        Log In
+                    </button>
+                </form>
+                <button onclick="hideDashboardAuthModal()" class="mt-4 text-sm text-neutral-500 hover:text-neutral-700 transition">Go Back</button>
+            </div>
+        </div>
+
+        <div id="dashboard-modal" class="hidden fixed inset-0 bg-gray-50 flex flex-col z-[105] transition-opacity duration-300">
+            <header class="p-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white shadow-sm">
+                <h3 class="text-2xl font-extrabold text-neutral-900 tracking-wide">Admin Panel</h3>
+                <button onclick="hideDashboardModal()" class="flex items-center text-sm font-semibold text-neutral-500 hover:text-neutral-800 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                    <i data-lucide="chevron-right" class="w-5 h-5 rotate-180 mr-1"></i> Back
+                </button>
+            </header>
+            
+            <nav class="flex border-b bg-white">
+                <button id="tab-orders" onclick="showDashboardTab('orders')" class="flex-1 py-3 px-2 flex items-center justify-center text-sm text-neutral-600 hover:text-neutral-900 transition tab-active">
+                    <i data-lucide="hand-coins" class="w-4 h-4 mr-2"></i> New Orders
+                </button>
+                <button id="tab-products" onclick="showDashboardTab('products')" class="flex-1 py-3 px-2 flex items-center justify-center text-sm text-neutral-600 hover:text-neutral-900 transition">
+                    <i data-lucide="package" class="w-4 h-4 mr-2"></i> Product Management
+                </button>
+            </nav>
+
+            <div class="p-4 overflow-y-auto flex-grow">
+                
+                <div id="dashboard-tab-orders" class="dashboard-tab-content">
+                    <p class="text-sm text-neutral-500 mb-4">All new orders (latest first) are listed below.</p>
+                    <div id="orders-list" class="space-y-4">
+                        <p class="text-center text-neutral-500 mt-8">Orders are loading...</p>
+                    </div>
+                </div>
+
+                <div id="dashboard-tab-products" class="dashboard-tab-content hidden">
+                    <p class="text-sm text-neutral-500 mb-4">Use the form below to add a new product.</p>
+                    
+                    <form id="add-product-form" class="bg-white p-4 rounded-xl shadow-lg space-y-4">
+                        <h4 class="text-lg font-bold text-neutral-900 border-b pb-2 flex items-center"><i data-lucide="list-plus" class="w-5 h-5 mr-2 text-amber-600"></i> Add New Product</h4>
+                        
+                        <div>
+                            <label for="new_product_name" class="block text-sm font-medium text-neutral-700">Product Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="new_product_name" name="name" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3" placeholder="e.g.: Luxury Winter Sweater">
+                        </div>
+
+                        <div>
+                            <label for="new_product_price" class="block text-sm font-medium text-neutral-700">Price (in INR) <span class="text-red-500">*</span></label>
+                            <input type="number" id="new_product_price" name="price" required min="1" class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3" placeholder="e.g.: 1999">
+                        </div>
+
+                        <div>
+                            <label for="new_product_image" class="block text-sm font-medium text-neutral-700">Image URL <span class="text-red-500">*</span></label>
+                            <input type="url" id="new_product_image" name="imageUrl" required class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3" placeholder="e.g.: https://i.imgur.com/yourimage.jpg">
+                            <p class="mt-1 text-xs text-amber-600 flex items-center">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-1"></i> 
+                                **CRITICAL:** Only a **DIRECT IMAGE URL** will work here (e.g., `https://i.imgur.com/...jpg` or `https://example.com/image.png`). Sharing links from Google Drive/Photos will not work!
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="new_product_description" class="block text-sm font-medium text-neutral-700">Description</label>
+                            <textarea id="new_product_description" name="description" rows="3" class="mt-1 block w-full border-neutral-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3" placeholder="Brief description of the product's features."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full flex items-center justify-center py-3 px-4 rounded-lg shadow-lg font-medium btn-premium">
+                            <i data-lucide="package" class="w-5 h-5 mr-2"></i> Save Product
+                        </button>
+                    </form>
+                    
+                    <h4 class="text-lg font-bold text-neutral-900 border-b pb-2 mt-8 flex items-center"><i data-lucide="layout-grid" class="w-5 h-5 mr-2 text-amber-600"></i> Current Products</h4>
+                    <div id="admin-product-list" class="mt-4 space-y-3">
+                        <p class="text-center text-neutral-500">Products are loading...</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="notification-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[106] p-4">
+            <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl text-center">
+                <div class="text-green-600 mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
+                    <svg data-lucide="shopping-bag" class="w-8 h-8"></svg>
+                </div>
+                <h4 class="text-xl font-bold text-neutral-900 mb-2" id="notification-title"></h4>
+                <p class="text-neutral-600 mb-6" id="notification-message"></p>
+                <button onclick="hideNotificationModal()" class="w-full py-2 bg-neutral-900 text-white font-medium rounded-lg hover:bg-neutral-700 transition">Close</button>
+            </div>
+        </div>
+        
+        <div id="loading-spinner" class="hidden fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-[107]">
+            <div class="flex flex-col items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-neutral-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-3 text-neutral-900 font-semibold">Processing...</p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="fixed bottom-4 right-4 space-y-3 flex flex-col items-end">
+        <button 
+            onclick="openMyOrdersModal()" 
+            class="floating-order-button w-16 h-16 rounded-full flex items-center justify-center"
+            aria-label="My Orders"
+        >
+            <i data-lucide="list-ordered" class="w-7 h-7 text-white"></i>
+        </button>
+
+        <a 
+            href="https://wa.me/919332307996?text=Hello%2C%20I%20have%20a%20question%20about%20your%20Darpan%20Wears%20collection." 
+            target="_blank" 
+            class="floating-whatsapp-button w-16 h-16 rounded-full flex items-center justify-center"
+            rel="noopener noreferrer"
+            aria-label="Chat on WhatsApp"
+        >
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.04 2C6.54 2 2.08 6.46 2.04 11.96c0 1.77.47 3.45 1.34 4.96L2 22l5.24-1.37c1.45.78 3.09 1.22 4.8 1.22 5.51 0 9.97-4.46 10-9.96C22.04 6.46 17.58 2 12.04 2zm5.72 13.91l-.15.26c-.53.94-2.73 1.07-3.95.73l-.7-.41-1.39 1.43c-.3.3-.68.45-1.07.45-.19 0-.39-.06-.57-.17-.7-.43-1.65-1.12-2.31-2.19-.66-1.08-1.06-2.26-1.06-3.44 0-.82.22-1.66.64-2.39l.11-.19c.47-.8.95-1.28 1.43-1.28.31 0 .6.14.8.44l.87 1.48c.18.3.28.59.28.89 0 .28-.1.54-.26.75l-.46.59c-.27.35-.38.75-.24 1.15.22.64.91 1.75 1.73 2.13.82.38 1.63.49 2.1.28.4-.18.78-.45 1.14-.65l.62-.35c.41-.24.9-.13 1.26.29l1.1 1.76c.21.35.31.75.28 1.15-.04.4-.18.79-.37 1.12z"/>
+            </svg>
+        </a>
+    </div>
+
+    <div class="badal-tag">
+        Made by Badal
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, setLogLevel, serverTimestamp, Timestamp, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { format } from "https://cdn.skypack.dev/date-fns@2.29.3"; 
+        
+        // Global Firebase and App Data variables
+        let app, db, auth;
+        let userId = null;
+        window.productsData = []; // Store products globally for easy access by modals
+        window.customerOrders = []; // Store customer orders globally
+        const OWNER_PASSWORD = 'darpan2025';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'darpan-wears-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        let isAdminLoggedIn = false;
+
+        setLogLevel('Debug');
+
+        // Firestore Collection Paths
+        const ORDERS_COLLECTION_PATH = `/artifacts/${appId}/public/data/darpan_wears_orders`;
+        const PRODUCTS_COLLECTION_PATH = `/artifacts/${appId}/public/data/darpan_wears_products`;
+
+        // --- SOUND EFFECTS INITIALIZATION ---
+        let successSynth, errorSynth, clickSynth;
+
+        /**
+         * Initializes the Tone.js synthesizers for app feedback.
+         * Only call this function once after the user interacts with the document (browser restriction).
+         */
+        async function initializeSound() {
+            try {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                }
+
+                // Success Sound: Simple rising pitch
+                successSynth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }
+                }).toDestination();
+                
+                // Error Sound: Sharp, lower, metallic sound
+                errorSynth = new Tone.MetalSynth({
+                    frequency: 80,
+                    envelope: { attack: 0.001, decay: 0.1, release: 0.1 },
+                    harmonicity: 5.1,
+                    modulationIndex: 32,
+                    resonance: 4000,
+                    octaves: 1.5
+                }).toDestination();
+                
+                // Click Sound: Very fast, subtle synth
+                clickSynth = new Tone.MembraneSynth({
+                    pitchDecay: 0.005,
+                    octaves: 1,
+                    envelope: { attack: 0.001, decay: 0.1, sustain: 0.0, release: 0.01 },
+                    volume: -10 // Keep it subtle
+                }).toDestination();
+            } catch (e) {
+                console.error("Tone.js initialization failed:", e);
+            }
+        }
+
+        /**
+         * Plays a rising success tone.
+         */
+        window.playSuccessSound = function() {
+             if (successSynth) {
+                successSynth.triggerAttackRelease("C5", "8n");
+                successSynth.triggerAttackRelease("G5", "8n", "+0.15");
+             }
+        }
+
+        /**
+         * Plays a sharp error tone.
+         */
+        window.playErrorSound = function() {
+             if (errorSynth) {
+                errorSynth.triggerAttackRelease("C3", "16n");
+             }
+        }
+        
+        /**
+         * Plays a subtle click sound.
+         */
+        window.playClickSound = function() {
+            if (clickSynth) {
+                clickSynth.triggerAttackRelease("C4", "32n");
+            }
+        }
+        
+        // Initializing Tone.js on the first user interaction (like clicking any button)
+        document.body.addEventListener('click', () => {
+            if (!successSynth) {
+                initializeSound();
+            }
+        }, { once: true });
+        
+        // General click handler to play subtle sound on interactive elements
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('button, a, .product-card')) {
+                 playClickSound();
+            }
+        });
+
+        // --- Firebase Initialization and Authentication ---
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            setPersistence(auth, browserSessionPersistence)
+                .then(() => {
+                    if (initialAuthToken) {
+                        return signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        return signInAnonymously(auth);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Firebase Auth Error:", error);
+                    userId = crypto.randomUUID();
+                    updateAuthStatusDisplay(userId, false); // Update with generated ID
+                });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Firebase Auth Ready. User ID:", userId);
+                    updateAuthStatusDisplay(userId, true);
+                    fetchProducts();
+                    fetchOrders(); // Start listening for Admin orders
+                    fetchCustomerOrders(); // NEW: Start listening for Customer orders
+                    checkAndAddInitialProduct();
+                } else {
+                    if (!userId) {
+                       userId = crypto.randomUUID();
+                       console.warn("Firebase initialized but no authenticated user. Using generated ID:", userId);
+                    }
+                    updateAuthStatusDisplay(userId, false);
+                }
+            });
+        } else {
+             console.error("Firebase configuration is missing. Data storage is disabled.");
+             userId = crypto.randomUUID();
+             updateAuthStatusDisplay(userId, false);
+             renderFallbackProducts();
+        }
+
+        /**
+         * Updates the display bar with the current user ID and status.
+         * @param {string} currentId The user's unique ID.
+         * @param {boolean} isAuthenticated Whether the user is authenticated.
+         */
+        function updateAuthStatusDisplay(currentId, isAuthenticated) {
+            const displayEl = document.getElementById('user-id-display');
+            const iconEl = document.querySelector('#auth-status-bar [data-lucide="user"]');
+            
+            if (displayEl) {
+                displayEl.textContent = `ID: ${currentId}`;
+            }
+
+            if (iconEl) {
+                if (isAuthenticated) {
+                    iconEl.classList.remove('text-red-500');
+                    iconEl.classList.add('text-amber-600');
+                } else {
+                    iconEl.classList.remove('text-amber-600');
+                    iconEl.classList.add('text-red-500');
+                }
+            }
+        }
+        
+        /**
+         * Copies the current User ID to the clipboard.
+         */
+        window.copyUserId = function() {
+            if (userId) {
+                try {
+                    // Use execCommand for broader compatibility in iFrames
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = userId;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    
+                    showNotificationModal(true, 'Copied!', `User ID copied to clipboard: ${userId.substring(0, 10)}...`);
+                } catch (err) {
+                    console.error('Could not copy text: ', err);
+                    showNotificationModal(false, 'Copy Error', 'Could not copy ID. Please select and copy manually.');
+                }
+            }
+        }
+
+        function renderFallbackProducts() {
+            const fallbackProducts = [
+                { 
+                    id: 'P001', 
+                    name: 'Luxury Denim Jacket', 
+                    price: 3499, 
+                    description: 'High-quality denim jacket, Limited Edition. This product is added for image testing, which is now working! It features a comfortable fit and durable stitching.', 
+                    imageUrl: 'https://i.postimg.cc/L5GSzMGg/IMG-20251026-181954-147.jpg' 
+                },
+                { 
+                    id: 'P002', 
+                    name: 'Premium Cotton T-Shirt', 
+                    price: 899, 
+                    description: 'T-shirt made from supersoft premium cotton. It stays comfortable in the heat and the color does not fade.', 
+                    imageUrl: 'https://placehold.co/400x400/171717/ffffff?text=Product+Image' 
+                }
+            ];
+            window.productsData = fallbackProducts; // Store fallback data
+            renderCustomerProducts(fallbackProducts);
+            document.getElementById('customer-product-grid').innerHTML += `<p class="col-span-2 text-center text-red-500 mt-4">⚠️ **Database Unavailable:** Showing dummy products only.</p>`;
+        }
+        
+        async function checkAndAddInitialProduct() {
+             if (!db) return;
+             
+             const productsCollectionRef = collection(db, PRODUCTS_COLLECTION_PATH);
+             try {
+                 const snapshot = await getDocs(productsCollectionRef);
+             
+                 if (snapshot.empty) {
+                     const initialProduct = {
+                         id: 'auto-P001',
+                         name: 'Luxury Denim Jacket', 
+                         price: 3499, 
+                         imageUrl: 'https://i.postimg.cc/L5GSzMGg/IMG-20251026-181954-147.jpg',
+                         description: 'High-quality denim jacket, Limited Edition. This jacket is a great style statement and lasts for years.',
+                         created_at: serverTimestamp()
+                     };
+                     const productDocRef = doc(db, PRODUCTS_COLLECTION_PATH, initialProduct.id);
+                     await setDoc(productDocRef, initialProduct);
+                     console.log("Initial product added successfully:", initialProduct.name);
+                 }
+             } catch (e) {
+                 console.error("Error checking or adding initial product:", e);
+             }
+        }
+
+        // --- General Utility Functions (Loading/Notification) ---
+
+        window.showLoading = function(show) {
+            const spinner = document.getElementById('loading-spinner');
+            if (show) {
+                spinner.classList.remove('hidden');
+            } else {
+                spinner.classList.add('hidden');
+            }
+        };
+        
+        window.showNotificationModal = function(success, title, message) {
+            const modal = document.getElementById('notification-modal');
+            const iconContainer = modal.querySelector('div.w-fit');
+            
+            const iconColorClass = success ? 'text-green-600' : 'text-red-600';
+            const bgColorClass = success ? 'bg-green-100' : 'bg-red-100';
+
+            iconContainer.className = `mx-auto mb-4 p-3 rounded-full w-fit ${iconColorClass} ${bgColorClass}`;
+            
+            iconContainer.innerHTML = success 
+                ? '<svg data-lucide="shopping-bag" class="w-8 h-8"></svg>' 
+                : '<svg data-lucide="alert-triangle" class="w-8 h-8"></svg>';
+
+            import('https://unpkg.com/lucide@latest').then(({ createIcons }) => {
+                createIcons();
+            });
+            
+            if (success) {
+                playSuccessSound();
+            } else {
+                playErrorSound();
+            }
+
+            document.getElementById('notification-title').textContent = title;
+            document.getElementById('notification-message').textContent = message;
+            modal.classList.remove('hidden');
+        };
+
+        window.hideNotificationModal = function() {
+            document.getElementById('notification-modal').classList.add('hidden');
+        };
+
+        // --- Customer View: Product Loading Logic ---
+
+        function fetchProducts() {
+            if (!db) return;
+
+            const productsCollectionRef = collection(db, PRODUCTS_COLLECTION_PATH);
+            
+            onSnapshot(productsCollectionRef, (snapshot) => {
+                const products = [];
+                snapshot.forEach(doc => {
+                    products.push({ id: doc.id, ...doc.data() });
+                });
+                
+                products.sort((a, b) => a.name.localeCompare(b.name));
+
+                window.productsData = products; // Store for modal access
+                renderCustomerProducts(products);
+                if (isAdminLoggedIn) {
+                    renderAdminProducts(products); // Only update admin view if logged in
+                }
+            }, (error) => {
+                console.error("Error fetching products:", error);
+                document.getElementById('customer-product-grid').innerHTML = `<p class="col-span-2 text-red-500 text-center mt-8">Error loading products.</p>`;
+            });
+        }
+        
+        function renderCustomerProducts(products) {
+            const gridElement = document.getElementById('customer-product-grid');
+            gridElement.innerHTML = ''; 
+
+            if (products.length === 0) {
+                gridElement.innerHTML = `<p class="col-span-2 text-center text-neutral-500 mt-8 p-4 bg-gray-100 rounded-lg">No products are currently available.</p>`;
+                return;
+            }
+
+            products.forEach(product => {
+                // FALLBACK IMAGE FIX: If imageUrl is missing or fails to load, use a placeholder
+                const fallbackImage = `https://placehold.co/400x400/f3f4f6/6b7280?text=IMAGE+MISSING`;
+                
+                const productHtml = `
+                    <div class="product-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition transform hover:shadow-xl hover:scale-[1.02] duration-300 cursor-pointer" 
+                         onclick="openProductDetailModal('${product.id}')"
+                         data-product-id="${product.id}">
+                        <div class="product-image-container relative aspect-square">
+                            <img src="${product.imageUrl}" onerror="this.src='${fallbackImage}';" alt="${product.name}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-neutral-900 bg-opacity-10 opacity-0 hover:opacity-100 transition duration-300 flex items-center justify-center">
+                                <span class="text-white font-bold text-lg p-3 bg-amber-600 rounded-full shadow-lg">View Details</span>
+                            </div>
+                        </div>
+                        <div class="p-3 text-center">
+                            <h3 class="font-semibold text-neutral-800 text-base">${product.name}</h3>
+                            <p class="text-xs text-neutral-500 mt-1 truncate">${product.description || 'No description.'}</p>
+                            <p class="text-amber-600 font-bold text-xl mt-1">₹${product.price.toLocaleString('en-IN')}</p>
+                        </div>
+                    </div>
+                `;
+                gridElement.insertAdjacentHTML('beforeend', productHtml);
+            });
+        }
+
+        // --- Product Detail Modal Functions ---
+
+        window.openProductDetailModal = function(productId) {
+            const product = window.productsData.find(p => p.id === productId);
+            if (!product) return;
+
+            const fallbackImage = `https://placehold.co/600x600/f3f4f6/6b7280?text=IMAGE+MISSING`;
+
+            // 1. Populate the content
+            document.getElementById('detail-image').src = product.imageUrl;
+            document.getElementById('detail-image').onerror = function() { this.src = fallbackImage; }; // Handle image loading errors
+            document.getElementById('detail-name').textContent = product.name;
+            document.getElementById('detail-price').textContent = `₹${product.price.toLocaleString('en-IN')}`;
+            document.getElementById('detail-description').textContent = product.description || 'No detailed description available.';
+
+            // 2. Set the Order button's action to open the checkout form
+            const orderBtn = document.getElementById('detail-order-btn');
+            orderBtn.onclick = () => {
+                closeProductDetailModal();
+                openCheckoutModal(productId);
+            };
+
+            // 3. Show the modal
+            const modal = document.getElementById('product-detail-modal');
+            modal.classList.remove('hidden');
+            // Give a slight delay before starting the transition for effect
+            setTimeout(() => {
+                modal.classList.add('modal-open');
+            }, 10);
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            
+            // Re-render lucide icons inside the modal
+            import('https://unpkg.com/lucide@latest').then(({ createIcons }) => {
+                createIcons();
+            });
+        };
+
+        window.closeProductDetailModal = function() {
+            const modal = document.getElementById('product-detail-modal');
+            modal.classList.remove('modal-open');
+            document.body.style.overflow = ''; // Restore scrolling
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // Wait for transition to finish
+        };
+
+        // --- Order Placement UI/Logic (Checkout Modal) ---
+
+        window.openCheckoutModal = function(productId) {
+            const product = window.productsData.find(p => p.id === productId);
+            if (!product) return;
+
+            const name = product.name;
+            const price = product.price;
+
+            document.getElementById('product_id_input').value = productId;
+            document.getElementById('product_name_input').value = name;
+            document.getElementById('product_price_input').value = price;
+
+            document.getElementById('selected-product-info').innerHTML = `
+                <p class="font-semibold text-neutral-800">Product: <span class="text-amber-600">${name}</span></p>
+                <p class="text-sm text-neutral-600">Price: <span class="font-bold text-xl text-amber-600">₹${price.toLocaleString('en-IN')}</span></p>
+            `;
+
+            const modal = document.getElementById('order-modal');
+            const formContainer = document.getElementById('order-form-container');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            formContainer.classList.remove('translate-y-full');
+            formContainer.classList.add('translate-y-0');
+            
+            document.getElementById('order-form').reset();
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        };
+
+        window.closeCheckoutModal = function() {
+            const modal = document.getElementById('order-modal');
+            const formContainer = document.getElementById('order-form-container');
+
+            modal.classList.remove('opacity-100');
+            formContainer.classList.remove('translate-y-0');
+            formContainer.classList.add('translate-y-full');
+
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                document.body.style.overflow = ''; // Restore scrolling
+            }, 300);
+        };
+        
+        // --- COMPLETE placeOrder FUNCTION ---
+        async function placeOrder(event) {
+            event.preventDefault();
+            
+            if (!userId || !db) {
+                console.error("User ID or DB is not set.");
+                showNotificationModal(false, 'Order Failed', 'System not ready. Please wait a few seconds and try again.');
+                return;
+            }
+
+            showLoading(true);
+            const form = event.target;
+            const priceValue = parseInt(form.product_price_input.value);
+            
+            // Simple validation check
+            if (isNaN(priceValue) || priceValue <= 0) {
+                 playErrorSound(); // Play error sound on client-side validation failure
+                 showLoading(false);
+                 showNotificationModal(false, 'Error', 'Invalid price.');
+                 return;
+            }
+
+            const orderData = {
+                product_id: form.product_id_input.value,
+                product_name: form.product_name_input.value,
+                product_price: priceValue,
+                customer_name: form.customer_name.value,
+                phone_number: form.phone_number.value,
+                address_line1: form.address_line1.value,
+                city: form.city.value,
+                state: form.state.value,
+                user_id: userId,
+                status: 'Pending', // New orders start as Pending
+                order_date: serverTimestamp()
+            };
+
+            try {
+                const ordersCollectionRef = collection(db, ORDERS_COLLECTION_PATH);
+                // Use doc(collection) and setDoc to automatically generate a document ID.
+                await setDoc(doc(ordersCollectionRef), orderData);
+
+                showLoading(false);
+                closeCheckoutModal();
+                // Sound and notification handled by showNotificationModal
+                showNotificationModal(true, '✅ Order Successful!', 'Your order has been placed successfully. The Darpan Wears team will contact you shortly. Thank you!');
+                form.reset();
+
+            } catch (error) {
+                console.error("Error placing order:", error);
+                showLoading(false);
+                // Sound and notification handled by showNotificationModal
+                showNotificationModal(false, '❌ Order Failed', 'A technical error occurred while placing the order. Please try again.');
+            }
+        }
+        document.getElementById('order-form').addEventListener('submit', placeOrder);
+
+        // --- NEW: Customer My Orders Logic ---
+
+        window.openMyOrdersModal = function() {
+             if (!userId) {
+                showNotificationModal(false, 'Error', 'Please wait for authentication to complete before viewing orders.');
+                return;
+            }
+            
+            const modal = document.getElementById('my-orders-modal');
+            modal.classList.remove('hidden');
+            // Start transition
+            setTimeout(() => {
+                modal.classList.add('modal-open');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+            
+            // Re-render lucide icons inside the modal
+            import('https://unpkg.com/lucide@latest').then(({ createIcons }) => {
+                createIcons();
+            });
+        };
+
+        window.closeMyOrdersModal = function() {
+            const modal = document.getElementById('my-orders-modal');
+            modal.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        };
+
+        /**
+         * Fetches and listens to the current user's orders only.
+         */
+        function fetchCustomerOrders() {
+             if (!db || !userId) return;
+
+             const ordersRef = collection(db, ORDERS_COLLECTION_PATH);
+             // Query orders where user_id matches the current user's ID
+             const q = query(ordersRef, where('user_id', '==', userId));
+
+             onSnapshot(q, (snapshot) => {
+                 const orders = [];
+                 snapshot.forEach(doc => {
+                     orders.push({ id: doc.id, ...doc.data() });
+                 });
+                 
+                 // Sort by date in memory (newest first)
+                 orders.sort((a, b) => {
+                    const dateA = a.order_date instanceof Timestamp ? a.order_date.toDate() : new Date();
+                    const dateB = b.order_date instanceof Timestamp ? b.order_date.toDate() : new Date();
+                    return dateB - dateA; // Descending order
+                });
+
+                 window.customerOrders = orders;
+                 renderCustomerOrders(orders);
+             }, (error) => {
+                 console.error("Error fetching customer orders:", error);
+                 document.getElementById('customer-orders-list').innerHTML = `<p class="text-center text-red-500 mt-8">ऑर्डर लोड करने में त्रुटि। (Error loading orders.)</p>`;
+             });
+        }
+        
+        /**
+         * Renders the customer's orders in the 'My Orders' modal.
+         */
+        function renderCustomerOrders(orders) {
+            const list = document.getElementById('customer-orders-list');
+            list.innerHTML = '';
+            
+            const statusMap = {
+                'Pending': { text: 'लंबित', color: 'bg-yellow-500', canCancel: true },
+                'Shipped': { text: 'शिप किया गया', color: 'bg-blue-500', canCancel: false },
+                'Delivered': { text: 'डिलीवर किया गया', color: 'bg-green-500', canCancel: false },
+                'Cancelled': { text: 'रद्द किया गया', color: 'bg-red-500', canCancel: false }
+            };
+
+            if (orders.length === 0) {
+                list.innerHTML = `<p class="text-center text-neutral-500 mt-8 p-4 bg-gray-100 rounded-lg">आपके पास अभी कोई ऑर्डर नहीं है।</p>`;
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderDate = order.order_date instanceof Timestamp ? format(order.order_date.toDate(), 'dd MMM yyyy, h:mm a') : 'N/A';
+                const statusInfo = statusMap[order.status] || { text: order.status, color: 'bg-gray-500', canCancel: false };
+                
+                const card = `
+                    <div class="bg-white p-4 rounded-xl shadow-lg border-l-4 ${statusInfo.color}">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-lg font-bold text-neutral-900">${order.product_name}</p>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full text-white ${statusInfo.color}">${statusInfo.text}</span>
+                        </div>
+                        <p class="text-sm text-neutral-700">**मूल्य (Price):** ₹${order.product_price.toLocaleString('en-IN')}</p>
+                        <p class="text-xs text-neutral-500 mt-1">ऑर्डर तिथि (Order Date): ${orderDate}</p>
+                        
+                        ${statusInfo.canCancel ? `
+                            <button onclick="confirmCancelOrder('${order.id}', '${order.product_name}')" 
+                                class="mt-3 w-full text-sm font-semibold py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-150 shadow-md">
+                                Cancel Order 
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', card);
+            });
+        }
+        
+        window.confirmCancelOrder = function(orderId, productName) {
+            // Since alert()/confirm() is forbidden, we use the notification modal for confirmation
+            
+            const modal = document.getElementById('notification-modal');
+            const actionButton = modal.querySelector('button');
+
+            document.getElementById('notification-title').textContent = '⚠️ Confirm Cancellation';
+            document.getElementById('notification-message').textContent = `क्या आप वाकई ${productName} ऑर्डर रद्द करना चाहते हैं? (Do you really want to cancel ${productName}?)`;
+
+            // Update the button for the specific cancel action
+            actionButton.textContent = 'Yes, Cancel Order'; // Updated text
+            actionButton.className = 'w-full py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition';
+            
+            // Set the handler to perform cancellation and revert the button
+            actionButton.onclick = async () => {
+                // Revert button and handler immediately before starting async task
+                actionButton.onclick = hideNotificationModal; 
+                actionButton.textContent = 'Close'; 
+                actionButton.className = 'w-full py-2 bg-neutral-900 text-white font-medium rounded-lg hover:bg-neutral-700 transition';
+                await cancelOrder(orderId, productName);
+            };
+
+            // Show modal (use red styling for cancellation warning)
+            const iconContainer = modal.querySelector('div.w-fit');
+            iconContainer.className = `mx-auto mb-4 p-3 rounded-full w-fit text-red-600 bg-red-100`;
+            iconContainer.innerHTML = '<svg data-lucide="alert-triangle" class="w-8 h-8"></svg>';
+            import('https://unpkg.com/lucide@latest').then(({ createIcons }) => {
+                createIcons();
+            });
+            modal.classList.remove('hidden');
+            playErrorSound(); // Play error sound to indicate a serious action
+        };
+
+        /**
+         * Updates the order status to 'Cancelled' in Firestore.
+         */
+        async function cancelOrder(orderId, productName) {
+             if (!db) return;
+             showLoading(true);
+
+             try {
+                const orderDocRef = doc(db, ORDERS_COLLECTION_PATH, orderId);
+                await updateDoc(orderDocRef, {
+                    status: 'Cancelled',
+                    cancel_date: serverTimestamp()
+                });
+                
+                closeMyOrdersModal();
+                showLoading(false);
+                // Note: fetchCustomerOrders will automatically update the list via onSnapshot
+                showNotificationModal(true, '✅ ऑर्डर रद्द किया गया (Order Cancelled)', `${productName} ऑर्डर सफलतापूर्वक रद्द कर दिया गया है।`);
+             } catch (error) {
+                 console.error("Error cancelling order:", error);
+                 showLoading(false);
+                 showNotificationModal(false, '❌ रद्द करने में त्रुटि (Cancellation Error)', 'ऑर्डर रद्द करने में कोई तकनीकी त्रुटि आई है। कृपया पुनः प्रयास करें।');
+             }
+        }
+
+        // --- Admin Dashboard Logic ---
+
+        window.openDashboardAuthModal = function() {
+            if (isAdminLoggedIn) {
+                showDashboardModal();
+            } else {
+                document.getElementById('dashboard-auth-modal').classList.remove('hidden');
+                document.getElementById('dashboard-password').focus();
+            }
+        }
+
+        window.hideDashboardAuthModal = function() {
+            document.getElementById('dashboard-auth-modal').classList.add('hidden');
+            document.getElementById('dashboard-auth-form').reset();
+            document.getElementById('auth-error-message').classList.add('hidden');
+        }
+        
+        window.showDashboardModal = function() {
+            document.getElementById('dashboard-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            hideDashboardAuthModal();
+            showDashboardTab('orders'); // Default to showing orders
+        }
+
+        window.hideDashboardModal = function() {
+            document.getElementById('dashboard-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        window.showDashboardTab = function(tabName) {
+            document.querySelectorAll('.dashboard-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('tab-active'));
+            
+            document.getElementById(`dashboard-tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
+
+            if (tabName === 'products') {
+                 // Ensure product list is updated when switching to products tab
+                 renderAdminProducts(window.productsData);
+            }
+        }
+
+        document.getElementById('dashboard-auth-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('dashboard-password').value;
+            const errorMsg = document.getElementById('auth-error-message');
+            
+            if (password === OWNER_PASSWORD) {
+                isAdminLoggedIn = true;
+                errorMsg.classList.add('hidden');
+                showDashboardModal();
+                playSuccessSound(); // Play success sound on login
+            } else {
+                playErrorSound(); // Play error sound on failed login
+                errorMsg.textContent = 'Incorrect password. Please try again.';
+                errorMsg.classList.remove('hidden');
+            }
+        });
+        
+        // --- Order Management (Admin Real-time) ---
+        function fetchOrders() {
+            if (!db) return;
+            const ordersCollectionRef = collection(db, ORDERS_COLLECTION_PATH);
+            
+            // Query to fetch all orders (no orderBy, sorting done in memory)
+            const q = query(ordersCollectionRef); 
+            
+            onSnapshot(q, (snapshot) => {
+                let orders = [];
+                snapshot.forEach(doc => {
+                    orders.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort by date in memory (newest first)
+                orders.sort((a, b) => {
+                    const dateA = a.order_date instanceof Timestamp ? a.order_date.toDate() : new Date();
+                    const dateB = b.order_date instanceof Timestamp ? b.order_date.toDate() : new Date();
+                    return dateB - dateA; // Descending order
+                });
+
+                if (isAdminLoggedIn) {
+                   renderAdminOrders(orders);
+                }
+            }, (error) => {
+                console.error("Error fetching orders:", error);
+            });
+        }
+        
+        function renderAdminOrders(orders) {
+            const list = document.getElementById('orders-list');
+            list.innerHTML = '';
+
+            if (orders.length === 0) {
+                list.innerHTML = `<p class="text-center text-neutral-500 mt-8 p-4 bg-gray-100 rounded-lg">No new orders at the moment.</p>`;
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderDate = order.order_date instanceof Timestamp ? format(order.order_date.toDate(), 'dd MMM yyyy, h:mm a') : 'N/A';
+                
+                let statusColor = 'bg-gray-500';
+                if (order.status === 'Pending') statusColor = 'bg-yellow-500';
+                else if (order.status === 'Shipped') statusColor = 'bg-blue-500';
+                else if (order.status === 'Delivered') statusColor = 'bg-green-500';
+                else if (order.status === 'Cancelled') statusColor = 'bg-red-500';
+
+                const card = `
+                    <div class="bg-white p-4 rounded-xl shadow border-l-4 ${statusColor}">
+                        <div class="flex justify-between items-start mb-2 border-b pb-2">
+                            <p class="text-lg font-bold text-neutral-900">${order.product_name}</p>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full text-white ${statusColor}">${order.status}</span>
+                        </div>
+                        <p class="text-sm text-neutral-700">**Price:** ₹${order.product_price.toLocaleString('en-IN')}</p>
+                        <p class="text-sm text-neutral-700">**Name:** ${order.customer_name}</p>
+                        <p class="text-sm text-neutral-700">**Phone:** <a href="tel:+91${order.phone_number}" class="text-indigo-600 hover:underline">${order.phone_number}</a></p>
+                        <p class="text-sm text-neutral-700 mt-2">**Address:** ${order.address_line1}, ${order.city}, ${order.state}</p>
+                        <p class="text-xs text-neutral-400 mt-2">Order Date: ${orderDate}</p>
+                        <p class="text-xs text-neutral-400 mt-1">User ID: ${order.user_id}</p>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        // --- Product Management Logic ---
+        document.getElementById('add-product-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!db) return;
+            showLoading(true);
+
+            const form = e.target;
+            const newProduct = {
+                name: form.name.value,
+                price: parseInt(form.price.value),
+                imageUrl: form.imageUrl.value,
+                description: form.description.value || 'No description.',
+                created_at: serverTimestamp()
+            };
+            
+            try {
+                // Use doc(collection) and setDoc to auto-generate ID for new products
+                await setDoc(doc(collection(db, PRODUCTS_COLLECTION_PATH)), newProduct);
+                
+                showLoading(false);
+                playSuccessSound(); // Play sound on successful add
+                showNotificationModal(true, '✅ Product Added', `${newProduct.name} has been listed successfully.`);
+                form.reset();
+            } catch (error) {
+                console.error("Error adding product:", error);
+                showLoading(false);
+                playErrorSound(); // Play error sound on failure
+                showNotificationModal(false, '❌ Error', 'Failed to add product.');
+            }
+        });
+
+        function renderAdminProducts(products) {
+            const list = document.getElementById('admin-product-list');
+            list.innerHTML = '';
+
+            if (products.length === 0) {
+                list.innerHTML = `<p class="text-center text-neutral-500 mt-4">No products available.</p>`;
+                return;
+            }
+
+            products.forEach(product => {
+                const fallbackImage = `https://placehold.co/100x100/f3f4f6/6b7280?text=IMG`;
+                const item = `
+                    <div class="flex items-center p-3 bg-white rounded-lg shadow-sm border border-gray-100">
+                        <img src="${product.imageUrl}" onerror="this.src='${fallbackImage}';" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-3">
+                        <div class="flex-grow">
+                            <p class="font-medium text-neutral-900 truncate">${product.name}</p>
+                            <p class="text-sm text-amber-600 font-bold">₹${product.price.toLocaleString('en-IN')}</p>
+                        </div>
+                        <button onclick="deleteProduct('${product.id}', '${product.name}')" class="text-red-500 hover:text-red-700 p-2 rounded-full transition" title="Delete Product">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                list.insertAdjacentHTML('beforeend', item);
+            });
+            
+            // Re-render lucide icons inside the product list
+            import('https://unpkg.com/lucide@latest').then(({ createIcons }) => {
+                createIcons();
+            });
+        }
+        
+        window.deleteProduct = async function(productId, productName) {
+            if (!db || !isAdminLoggedIn) return;
+            
+            // In a real app, a custom modal is used for confirmation. 
+            // Here, we provide a warning via notification and proceed (since confirm() is forbidden).
+            showNotificationModal(false, 'Deletion Confirmation', `Are you sure you want to delete ${productName}? This action is **irreversible**.`);
+            
+            showLoading(true);
+            try {
+                await deleteDoc(doc(db, PRODUCTS_COLLECTION_PATH, productId));
+                showLoading(false);
+                playSuccessSound(); // Play sound on deletion
+                showNotificationModal(true, '✅ Success', `${productName} has been successfully deleted.`);
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                showLoading(false);
+                playErrorSound(); // Play error sound on failure
+                showNotificationModal(false, '❌ Error', 'Failed to delete product.');
+            }
+        }
+
+    </script>
+</body>
+</html>
